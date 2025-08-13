@@ -1,0 +1,6 @@
+{
+  "name": "Novel Finder Pro",
+  "description": "An advanced web application for searching, filtering, and sorting a collection of novels. Features include multi-level sorting, advanced filtering by genres, tags, and ratings, and a recommendation engine for similar novels.",
+  "requestFramePermissions": [],
+  "prompt": ""
+}
