@@ -1,5 +1,3 @@
-
-
 import { Novel } from '../types';
 
 
