@@ -139,7 +139,7 @@ const NovelDetailModal: React.FC<NovelDetailModalProps> = ({ novel, allNovels, s
           />
           <div className="flex-1 p-6 overflow-y-auto">
             <div className="flex justify-between items-start">
-              <h2 className="text-3xl font-bold text-white mb-2 flex-1 truncate pr-4">{novel.title}</h2>
+              <h2 className="text-3xl font-bold text-white mb-2 flex-1 pr-4 break-words">{novel.title}</h2>
               <div className="flex items-center gap-2 shrink-0">
                   {showBackButton && (
                       <button onClick={onGoBack} className="text-gray-400 hover:text-white flex items-center gap-1.5 px-2 py-1 rounded-md hover:bg-gray-700 transition-colors animate-fade-in" aria-label="Go back to previous novel">
