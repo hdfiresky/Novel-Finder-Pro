@@ -51,16 +51,22 @@ const AppContent: React.FC = () => {
     const [hasNavigatedInModal, setHasNavigatedInModal] = useState(false);
     
     const [isSidebarOpen, setSidebarOpen] = useState(() => {
+        // On mobile, always start with the sidebar closed for a better initial view.
+        if (window.innerWidth < 768) {
+            return false;
+        }
+        
+        // On desktop, respect the session storage setting.
         try {
             const stored = sessionStorage.getItem(SIDEBAR_STATE_KEY);
             if (stored !== null) {
                 return JSON.parse(stored);
             }
-            // Default to open only on screens wider than 768px (desktop)
-            return window.innerWidth >= 768; 
+            // Default to open on desktop if no session state is found.
+            return true; 
         } catch {
-            // Fallback in case of error
-            return window.innerWidth >= 768;
+            // Fallback in case of error.
+            return true;
         }
     });
 
