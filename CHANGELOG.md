@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.2](https://github.com/hdfiresky/Problembuddy-deploy/compare/v0.1.3...v0.2.2) (2025-08-17)
+
+
+### Features
+
+* deploy  ([#4](https://github.com/hdfiresky/Problembuddy-deploy/issues/4)) ([3718172](https://github.com/hdfiresky/Problembuddy-deploy/commit/3718172283385ea8bab234dd25552b94ba4a6d04))
+
+
+### Bug Fixes
+
+* merge conflicts ([c30defb](https://github.com/hdfiresky/Problembuddy-deploy/commit/c30defb109f704ebc966bc45fb548e3151370af7))
+
+### [0.2.1](https://github.com/hdfiresky/Problembuddy-deploy/compare/v0.2.0...v0.2.1) (2025-08-17)
+
+## [0.2.0](https://github.com/hdfiresky/Problembuddy-deploy/compare/v0.1.1...v0.2.0) (2025-08-17)
+
 ### [0.2.1](https://github.com/hdfiresky/Problembuddy-deploy/compare/v0.2.0...v0.2.1) (2025-08-17)
 
 ## [0.2.0](https://github.com/hdfiresky/Problembuddy-deploy/compare/v0.1.1...v0.2.0) (2025-08-17)
