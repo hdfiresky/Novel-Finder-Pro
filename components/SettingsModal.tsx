@@ -1,4 +1,5 @@
 
+
 import React from 'react';
 import { useUserData } from '../contexts/UserDataContext';
 import Icon from './Icon';
@@ -45,6 +46,17 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ onClose }) => {
                         checked={settings.showWishlistButton}
                         onChange={(checked) => updateSettings({ showWishlistButton: checked })}
                         description="Display bookmark icons on novel cards and in details."
+                    />
+                </div>
+            </div>
+            <div>
+                <h3 className="text-lg font-semibold text-gray-200 mb-3">Content Settings</h3>
+                <div className="space-y-4 p-4 bg-gray-900/50 rounded-lg">
+                    <Switch
+                        label="Show NSFW Content"
+                        checked={settings.showNsfw}
+                        onChange={(checked) => updateSettings({ showNsfw: checked })}
+                        description="Display content that may be unsuitable for all audiences."
                     />
                 </div>
             </div>

@@ -25,6 +25,7 @@ const AppContent: React.FC = () => {
         allNovels,
         paginatedNovels,
         totalFilteredCount,
+        totalNovelsCount,
         filters,
         handleFilterChange,
         handleToggleFilter,
@@ -137,7 +138,7 @@ const AppContent: React.FC = () => {
                     </button>
                     <div className="flex items-center gap-4">
                        {view === 'home' && <div className="text-sm text-gray-400 hidden sm:block">
-                            {totalFilteredCount} / {allNovels.length} novels
+                            {totalFilteredCount} / {totalNovelsCount} novels
                         </div>}
                         {user ? (
                             <ProfileDropdown onGoToLibrary={() => setView('library')} onOpenSettings={() => setIsSettingsModalOpen(true)} />

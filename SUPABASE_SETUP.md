@@ -18,6 +18,7 @@ create table profiles (
   email text,
   show_favorite_button boolean default false,
   show_wishlist_button boolean default true,
+  show_nsfw_content boolean default false,
 
   constraint username_length check (char_length(username) >= 3)
 );
@@ -49,13 +50,14 @@ language plpgsql
 security definer set search_path = public
 as $$
 begin
-  insert into public.profiles (id, username, email, show_favorite_button, show_wishlist_button)
+  insert into public.profiles (id, username, email, show_favorite_button, show_wishlist_button, show_nsfw_content)
   values (
     new.id,
     new.raw_user_meta_data->>'username',
     new.email,
     false, -- Default for favorite button
-    true   -- Default for wishlist button
+    true,  -- Default for wishlist button
+    false  -- Default for NSFW content
   );
   return new;
 end;
