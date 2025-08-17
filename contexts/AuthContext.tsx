@@ -2,7 +2,7 @@
 import React, { createContext, useState, useEffect, useContext, ReactNode } from 'react';
 import { User } from '../types';
 // STEP 1: Uncomment this line to use Supabase
-// import { supabase } from '../supabase/client';
+import { supabase } from '../supabase/client';
 
 // Mock user storage keys
 const USERS_STORAGE_KEY = 'novel_finder_users';
@@ -23,6 +23,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [loading, setLoading] = useState(true);
 
   // --- LOCAL STORAGE IMPLEMENTATION (Current) ---
+  /*
   useEffect(() => {
     try {
       // Give a slight delay to show loading state, mimics real-world app loading
@@ -95,11 +96,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     localStorage.removeItem(SESSION_STORAGE_KEY);
     setUser(null);
   };
+  */
   // --- END OF LOCAL STORAGE IMPLEMENTATION ---
 
 
   // --- SUPABASE IMPLEMENTATION (Commented Out) ---
-  /*
   // STEP 2: Comment out the entire "LOCAL STORAGE IMPLEMENTATION" block above.
   // STEP 3: Uncomment the "SUPABASE IMPLEMENTATION" block below.
 
@@ -173,7 +174,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const { error } = await supabase.auth.signOut();
     if (error) throw new Error(error.message);
   };
-  */
   // --- END OF SUPABASE IMPLEMENTATION ---
 
 

@@ -19,7 +19,7 @@ export const loadNovels = async (): Promise<Novel[]> => {
         return Promise.resolve(cachedNovels);
     }
 
-    const response = await fetch('/data/novels.json');
+    const response = await fetch('/novel-finder-pro/data/novels.json');
     if (!response.ok) {
         throw new Error(`Failed to fetch novels data: ${response.statusText}`);
     }

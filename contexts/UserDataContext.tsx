@@ -3,7 +3,7 @@ import React, { createContext, useState, useEffect, useContext, ReactNode, useCa
 import { Novel, Review, UserSettings } from '../types';
 import { useAuth } from './AuthContext';
 // STEP 1: Uncomment this line to use Supabase
-// import { supabase } from '../supabase/client';
+import { supabase } from '../supabase/client';
 
 
 interface UserDataContextType {
@@ -34,9 +34,10 @@ export const UserDataProvider: React.FC<{ children: ReactNode }> = ({ children }
   const [reviews, setReviews] = useState<Map<string, Review>>(new Map());
   const [wishlist, setWishlist] = useState<Set<string>>(new Set());
   const [settings, setSettings] = useState<UserSettings>(defaultSettings);
-  const [isLoaded, setIsLoaded] = useState(false);
 
   // --- LOCAL STORAGE IMPLEMENTATION (Current) ---
+  /*
+  const [isLoaded, setIsLoaded] = useState(false);
   useEffect(() => {
     if (user) {
       try {
@@ -126,16 +127,16 @@ export const UserDataProvider: React.FC<{ children: ReactNode }> = ({ children }
         return updated;
     });
   };
+  */
   // --- END OF LOCAL STORAGE IMPLEMENTATION ---
 
 
   // --- SUPABASE IMPLEMENTATION (Commented Out) ---
-  /*
   // STEP 2: Comment out the entire "LOCAL STORAGE IMPLEMENTATION" block above.
   // STEP 3: Uncomment this "SUPABASE IMPLEMENTATION" block below.
 
   useEffect(() => {
-    if (user && !isLoaded) {
+    if (user) {
         const loadUserData = async () => {
             try {
                 // Fetch all data in parallel
@@ -164,23 +165,71 @@ export const UserDataProvider: React.FC<{ children: ReactNode }> = ({ children }
                         showWishlistButton: settingsRes.data.show_wishlist_button
                     });
                 }
-
             } catch (error) {
                 console.error("Error loading user data from Supabase:", error);
-            } finally {
-                setIsLoaded(true);
             }
         };
         loadUserData();
+
+        // Real-time subscriptions
+        const favoritesSubscription = supabase.channel(`public:favorites:user_id=eq.${user.id}`)
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'favorites', filter: `user_id=eq.${user.id}` }, payload => {
+            const { eventType, new: newRecord, old: oldRecord } = payload;
+            if (eventType === 'INSERT') {
+              setFavorites(prev => new Set(prev).add(newRecord.novel_id));
+            } else if (eventType === 'DELETE') {
+              setFavorites(prev => {
+                const newFavs = new Set(prev);
+                newFavs.delete(oldRecord.novel_id);
+                return newFavs;
+              });
+            }
+          })
+          .subscribe();
+
+        const wishlistSubscription = supabase.channel(`public:wishlist:user_id=eq.${user.id}`)
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'wishlist', filter: `user_id=eq.${user.id}` }, payload => {
+            const { eventType, new: newRecord, old: oldRecord } = payload;
+            if (eventType === 'INSERT') {
+              setWishlist(prev => new Set(prev).add(newRecord.novel_id));
+            } else if (eventType === 'DELETE') {
+              setWishlist(prev => {
+                const newWish = new Set(prev);
+                newWish.delete(oldRecord.novel_id);
+                return newWish;
+              });
+            }
+          })
+          .subscribe();
+        
+        const reviewsSubscription = supabase.channel(`public:reviews:user_id=eq.${user.id}`)
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'reviews', filter: `user_id=eq.${user.id}` }, payload => {
+            const { eventType, new: newRecord, old: oldRecord } = payload;
+            setReviews(currentReviews => {
+              const newReviews = new Map(currentReviews);
+              if (eventType === 'INSERT' || eventType === 'UPDATE') {
+                  newReviews.set(newRecord.novel_id, { rating: newRecord.rating, text: newRecord.text });
+              } else if (eventType === 'DELETE') {
+                  newReviews.delete(oldRecord.novel_id);
+              }
+              return newReviews;
+            });
+          })
+          .subscribe();
+
+        return () => {
+          supabase.removeChannel(favoritesSubscription);
+          supabase.removeChannel(wishlistSubscription);
+          supabase.removeChannel(reviewsSubscription);
+        }
     } else if (!user) {
         // Clear data on logout
         setFavorites(new Set());
         setWishlist(new Set());
         setReviews(new Map());
         setSettings(defaultSettings);
-        setIsLoaded(false);
     }
-  }, [user, isLoaded]);
+  }, [user]);
 
   const isFavorite = useCallback((novelId: string) => favorites.has(novelId), [favorites]);
   const toggleFavorite = async (novel: Novel) => {
@@ -296,7 +345,6 @@ export const UserDataProvider: React.FC<{ children: ReactNode }> = ({ children }
         setSettings(oldSettings);
     }
   };
-  */
   // --- END OF SUPABASE IMPLEMENTATION ---
 
 
