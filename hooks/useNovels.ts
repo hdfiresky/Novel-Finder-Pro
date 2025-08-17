@@ -29,7 +29,7 @@ const SORT_SESSION_KEY = 'novel_finder_sort';
 const PAGE_SESSION_KEY = 'novel_finder_page';
 
 // NSFW Content Filtering
-const NSFW_GENRES = ['smut', 'yaoi', 'yuri', 'mature', 'adult'];
+const NSFW_GENRES = ['smut', 'yaoi', 'yuri', 'mature', 'adult', 'harem', 'ecchi'];
 const NSFW_TAGS = ['r-18', 'yaoi', 'yuri'];
 
 const isNovelNsfw = (novel: Novel): boolean => {
