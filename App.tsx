@@ -25,6 +25,7 @@ const AppContent: React.FC = () => {
         allNovels,
         paginatedNovels,
         totalFilteredCount,
+        totalNovelsCount,
         filters,
         handleFilterChange,
         handleToggleFilter,
@@ -52,9 +53,14 @@ const AppContent: React.FC = () => {
     const [isSidebarOpen, setSidebarOpen] = useState(() => {
         try {
             const stored = sessionStorage.getItem(SIDEBAR_STATE_KEY);
-            return stored ? JSON.parse(stored) : true;
+            if (stored !== null) {
+                return JSON.parse(stored);
+            }
+            // Default to open only on screens wider than 768px (desktop)
+            return window.innerWidth >= 768; 
         } catch {
-            return true;
+            // Fallback in case of error
+            return window.innerWidth >= 768;
         }
     });
 
@@ -132,7 +138,7 @@ const AppContent: React.FC = () => {
                     </button>
                     <div className="flex items-center gap-4">
                        {view === 'home' && <div className="text-sm text-gray-400 hidden sm:block">
-                            {totalFilteredCount} / {allNovels.length} novels
+                            {totalFilteredCount} / {totalNovelsCount} novels
                         </div>}
                         {user ? (
                             <ProfileDropdown onGoToLibrary={() => setView('library')} onOpenSettings={() => setIsSettingsModalOpen(true)} />

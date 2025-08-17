@@ -1,4 +1,5 @@
 
+
 import React, { createContext, useState, useEffect, useContext, ReactNode, useCallback } from 'react';
 import { Novel, Review, UserSettings } from '../types';
 import { useAuth } from './AuthContext';
@@ -26,6 +27,7 @@ const UserDataContext = createContext<UserDataContextType | undefined>(undefined
 const defaultSettings: UserSettings = {
     showFavoriteButton: false,
     showWishlistButton: true,
+    showNsfw: false,
 };
 
 export const UserDataProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
@@ -144,7 +146,7 @@ export const UserDataProvider: React.FC<{ children: ReactNode }> = ({ children }
                     supabase.from('favorites').select('novel_id').eq('user_id', user.id),
                     supabase.from('wishlist').select('novel_id').eq('user_id', user.id),
                     supabase.from('reviews').select('*').eq('user_id', user.id),
-                    supabase.from('profiles').select('show_favorite_button, show_wishlist_button').eq('id', user.id).single()
+                    supabase.from('profiles').select('show_favorite_button, show_wishlist_button, show_nsfw_content').eq('id', user.id).single()
                 ]);
 
                 if (favRes.error) throw favRes.error;
@@ -162,7 +164,8 @@ export const UserDataProvider: React.FC<{ children: ReactNode }> = ({ children }
                 if (settingsRes.data) {
                     setSettings({
                         showFavoriteButton: settingsRes.data.show_favorite_button,
-                        showWishlistButton: settingsRes.data.show_wishlist_button
+                        showWishlistButton: settingsRes.data.show_wishlist_button,
+                        showNsfw: settingsRes.data.show_nsfw_content
                     });
                 }
             } catch (error) {
@@ -336,7 +339,8 @@ export const UserDataProvider: React.FC<{ children: ReactNode }> = ({ children }
             .from('profiles')
             .update({
                 show_favorite_button: updated.showFavoriteButton,
-                show_wishlist_button: updated.showWishlistButton
+                show_wishlist_button: updated.showWishlistButton,
+                show_nsfw_content: updated.showNsfw
             })
             .eq('id', user.id);
         if (error) throw error;

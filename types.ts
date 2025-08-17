@@ -66,4 +66,5 @@ export interface Review {
 export interface UserSettings {
   showFavoriteButton: boolean;
   showWishlistButton: boolean;
+  showNsfw: boolean;
 }

@@ -1,9 +1,11 @@
 
 
 import { useState, useMemo, useCallback, useEffect } from 'react';
-import { Novel, FilterState, SortOption, RecommendationCriteria } from '../types';
+import { Novel, FilterState, SortOption, RecommendationCriteria, UserSettings } from '../types';
 import { loadNovels } from '../data/novels';
 import { useDebounce } from './useDebounce';
+import { useAuth } from '../contexts/AuthContext';
+import { useUserData } from '../contexts/UserDataContext';
 
 const toSentenceCase = (str: string): string => {
   if (!str) return '';
@@ -26,12 +28,39 @@ const FILTERS_SESSION_KEY = 'novel_finder_filters';
 const SORT_SESSION_KEY = 'novel_finder_sort';
 const PAGE_SESSION_KEY = 'novel_finder_page';
 
+// NSFW Content Filtering
+const NSFW_GENRES = ['smut', 'yaoi', 'yuri', 'mature', 'adult'];
+const NSFW_TAGS = ['r-18', 'yaoi', 'yuri'];
+
+const isNovelNsfw = (novel: Novel): boolean => {
+    const novelGenres = novel.genres.map(g => g.toLowerCase());
+    if (NSFW_GENRES.some(nsfwGenre => novelGenres.includes(nsfwGenre))) {
+        return true;
+    }
+    const novelTags = novel.tags.map(t => t.toLowerCase());
+    if (NSFW_TAGS.some(nsfwTag => novelTags.includes(nsfwTag))) {
+        return true;
+    }
+    return false;
+};
+
 export const useNovels = () => {
-    const [allNovels, setAllNovels] = useState<Novel[]>([]);
+    const [rawNovels, setRawNovels] = useState<Novel[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     
     const [initialFilterState, setInitialFilterState] = useState<FilterState | null>(null);
+
+    const { user } = useAuth();
+    const { settings } = useUserData();
+
+    const allNovels = useMemo(() => {
+        const showNsfw = user && settings.showNsfw;
+        if (showNsfw) {
+            return rawNovels;
+        }
+        return rawNovels.filter(novel => !isNovelNsfw(novel));
+    }, [rawNovels, user, settings.showNsfw]);
 
     const [filters, setFilters] = useState<FilterState | null>(() => {
         try {
@@ -85,44 +114,7 @@ export const useNovels = () => {
         const initialize = async () => {
             try {
                 const novels = await loadNovels();
-                setAllNovels(novels);
-                
-                const maxChapters = getMaxNumericValue(novels, 'chapter_count');
-                const initialState: FilterState = {
-                    searchTerm: '',
-                    genres: { include: [], exclude: [] },
-                    tags: { include: [], exclude: [] },
-                    status: null,
-                    ratingRange: [0, 10],
-                    chapterCountRange: [0, maxChapters],
-                };
-                
-                setInitialFilterState(initialState);
-                
-                // Only set filters to initial state if none were loaded from session
-                setFilters(prev => {
-                    if (prev) {
-                        // If filters were loaded, ensure ranges are valid with loaded data
-                        return {
-                            ...prev,
-                            chapterCountRange: [
-                                Math.min(prev.chapterCountRange[0], maxChapters),
-                                Math.min(prev.chapterCountRange[1], maxChapters)
-                            ]
-                        };
-                    }
-                    return initialState;
-                });
-                
-                const allGenres = novels.flatMap(n => n.genres).map(toSentenceCase);
-                setAvailableGenres(Array.from(new Set(allGenres)).filter(Boolean).sort());
-                
-                const allTags = novels.flatMap(n => n.tags).map(toSentenceCase);
-                setAvailableTags(Array.from(new Set(allTags)).filter(Boolean).sort());
-                
-                setAvailableStatuses(getRawAvailableOptions<string>(novels, 'status'));
-                setMaxChapterCount(maxChapters);
-
+                setRawNovels(novels);
             } catch (err) {
                 setError(err instanceof Error ? err.message : 'Failed to load data');
             } finally {
@@ -132,6 +124,45 @@ export const useNovels = () => {
 
         initialize();
     }, []);
+
+    useEffect(() => {
+        if (allNovels.length === 0) return;
+
+        const maxChapters = getMaxNumericValue(allNovels, 'chapter_count');
+        const initialState: FilterState = {
+            searchTerm: '',
+            genres: { include: [], exclude: [] },
+            tags: { include: [], exclude: [] },
+            status: null,
+            ratingRange: [0, 10],
+            chapterCountRange: [0, maxChapters],
+        };
+        
+        setInitialFilterState(initialState);
+        
+        setFilters(prev => {
+            if (prev) {
+                return {
+                    ...prev,
+                    chapterCountRange: [
+                        Math.min(prev.chapterCountRange[0], maxChapters),
+                        Math.min(prev.chapterCountRange[1], maxChapters)
+                    ]
+                };
+            }
+            return initialState;
+        });
+        
+        const allGenres = allNovels.flatMap(n => n.genres).map(toSentenceCase);
+        setAvailableGenres(Array.from(new Set(allGenres)).filter(Boolean).sort());
+        
+        const allTags = allNovels.flatMap(n => n.tags).map(toSentenceCase);
+        setAvailableTags(Array.from(new Set(allTags)).filter(Boolean).sort());
+        
+        setAvailableStatuses(getRawAvailableOptions<string>(allNovels, 'status'));
+        setMaxChapterCount(maxChapters);
+
+    }, [allNovels]);
 
     // Save state to sessionStorage on change
     useEffect(() => {
@@ -340,6 +371,7 @@ export const useNovels = () => {
         allNovels,
         paginatedNovels,
         totalFilteredCount: filteredAndSortedNovels.length,
+        totalNovelsCount: rawNovels.length,
         filters,
         handleFilterChange,
         handleToggleFilter,
