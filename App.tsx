@@ -52,9 +52,14 @@ const AppContent: React.FC = () => {
     const [isSidebarOpen, setSidebarOpen] = useState(() => {
         try {
             const stored = sessionStorage.getItem(SIDEBAR_STATE_KEY);
-            return stored ? JSON.parse(stored) : true;
+            if (stored !== null) {
+                return JSON.parse(stored);
+            }
+            // Default to open only on screens wider than 768px (desktop)
+            return window.innerWidth >= 768; 
         } catch {
-            return true;
+            // Fallback in case of error
+            return window.innerWidth >= 768;
         }
     });
 
