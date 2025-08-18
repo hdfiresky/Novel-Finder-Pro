@@ -28,7 +28,7 @@ export default defineConfig(({ mode }) => {
         ],
         manifest: {
           name: 'Novel Finder Pro',
-          short_name: 'NovelFinder',
+          short_name: 'Novel Finder Pro',
           description: 'An advanced web application for searching, filtering, and sorting a collection of novels.',
           start_url: '/novel-finder-pro/',
           scope: '/novel-finder-pro/',
@@ -38,17 +38,17 @@ export default defineConfig(({ mode }) => {
           theme_color: '#4f46e5',
           icons: [
             {
-              src: "/tutorial/pwa-192x192.webp",
+              src: "/novel-finder-pro/pwa-192x192.webp",
               sizes: "192x192",
               type: "image/webp",
             },
             {
-              src: "/tutorial/pwa-512x512.webp",
+              src: "/novel-finder-pro/pwa-512x512.webp",
               sizes: "512x512",
               type: "image/webp",
             },
             {
-              src: "/tutorial/pwa-512x512.webp",
+              src: "/novel-finder-pro/pwa-512x512.webp",
               sizes: "512x512",
               type: "image/webp",
               purpose: "any maskable",
