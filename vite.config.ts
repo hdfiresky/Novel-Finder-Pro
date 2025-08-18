@@ -20,9 +20,11 @@ export default defineConfig(({ mode }) => {
       VitePWA({
         registerType: 'autoUpdate',
         includeAssets: [
-          'favicon.svg',
-          'robots.txt',
-          'assets/icon-192.svg'
+          "robots.txt",
+          "favicon.png",
+          "apple-touch-icon.webp",
+          "pwa-192x192.webp",
+          "pwa-512x512.webp"
         ],
         manifest: {
           name: 'Novel Finder Pro',
@@ -36,23 +38,21 @@ export default defineConfig(({ mode }) => {
           theme_color: '#4f46e5',
           icons: [
             {
-              src: '/novel-finder-pro/assets/icon-192.svg',
-              sizes: '192x192',
-              type: 'image/svg+xml',
-              purpose: 'any'
+              src: "/tutorial/pwa-192x192.webp",
+              sizes: "192x192",
+              type: "image/webp",
             },
             {
-              src: '/novel-finder-pro/favicon.svg',
-              sizes: '512x512',
-              type: 'image/svg+xml',
-              purpose: 'any'
+              src: "/tutorial/pwa-512x512.webp",
+              sizes: "512x512",
+              type: "image/webp",
             },
             {
-              src: '/novel-finder-pro/favicon.svg',
-              sizes: '512x512',
-              type: 'image/svg+xml',
-              purpose: 'maskable'
-            }
+              src: "/tutorial/pwa-512x512.webp",
+              sizes: "512x512",
+              type: "image/webp",
+              purpose: "any maskable",
+            },
           ]
         },
         workbox: {
