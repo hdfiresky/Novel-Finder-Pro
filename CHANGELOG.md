@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.3](https://github.com/hdfiresky/Problembuddy-deploy/compare/v0.2.2...v0.2.3) (2025-08-18)
+
+
+### Bug Fixes
+
+* novel finder icon ([94713bd](https://github.com/hdfiresky/Problembuddy-deploy/commit/94713bd1acc72ed60d593884f27161730a729e7b))
+
 ### [0.2.2](https://github.com/hdfiresky/Problembuddy-deploy/compare/v0.1.3...v0.2.2) (2025-08-17)
 
 
