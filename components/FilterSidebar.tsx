@@ -5,6 +5,7 @@ import SortControls from './SortControls';
 import Button from './ui/Button';
 import RecommendationTuner from './RecommendationTuner';
 import CollapsibleFilterList from './ui/CollapsibleFilterList';
+import Icon from './Icon';
 
 interface FilterSidebarProps {
   filterState: FilterState;
@@ -19,6 +20,7 @@ interface FilterSidebarProps {
   maxChapterCount: number;
   recommendationCriteria: RecommendationCriteria;
   onRecommendationCriteriaChange: (key: keyof RecommendationCriteria) => void;
+  onClose: () => void;
 }
 
 /**
@@ -40,13 +42,24 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
   maxChapterCount,
   recommendationCriteria,
   onRecommendationCriteriaChange,
+  onClose,
 }) => {
 
   return (
     <aside className="w-full md:w-80 lg:w-96 bg-gray-800 p-6 flex-shrink-0 h-full overflow-y-auto">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold text-white">Filters</h2>
-        <Button onClick={onReset} variant="secondary" className="text-sm px-3 py-1">Reset</Button>
+        <div className="flex items-center gap-2">
+            <Button onClick={onReset} variant="secondary" className="text-sm px-3 py-1">Reset</Button>
+            <button
+                onClick={onClose}
+                className="text-gray-400 hover:text-white p-1.5 rounded-md hover:bg-gray-700 transition-colors"
+                aria-label="Close filters"
+                title="Close filters"
+            >
+                <Icon name="X" size={20} />
+            </button>
+        </div>
       </div>
 
       <div className="space-y-6">

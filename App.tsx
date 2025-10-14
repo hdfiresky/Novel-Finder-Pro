@@ -228,7 +228,7 @@ const AppContent: React.FC = () => {
 
                 <div className="flex flex-1 overflow-hidden">
                     <div className={`transition-all duration-300 ${isSidebarOpen && urlState.view === 'home' ? 'w-80 lg:w-96' : 'w-0'} h-full overflow-hidden`}>
-                        <FilterSidebar filterState={urlState.filters} onFilterChange={handleFilterChange} onToggleFilter={handleToggleFilter} sortOptions={urlState.sortOptions} onSortChange={handleSortChange} onReset={resetFiltersAndSort} availableGenres={availableGenres} availableTags={availableTags} availableStatuses={availableStatuses} maxChapterCount={maxChapterCount} recommendationCriteria={recommendationCriteria} onRecommendationCriteriaChange={key => setRecommendationCriteria(prev => ({...prev, [key]: !prev[key]}))} />
+                        <FilterSidebar filterState={urlState.filters} onFilterChange={handleFilterChange} onToggleFilter={handleToggleFilter} sortOptions={urlState.sortOptions} onSortChange={handleSortChange} onReset={resetFiltersAndSort} availableGenres={availableGenres} availableTags={availableTags} availableStatuses={availableStatuses} maxChapterCount={maxChapterCount} recommendationCriteria={recommendationCriteria} onRecommendationCriteriaChange={key => setRecommendationCriteria(prev => ({...prev, [key]: !prev[key]}))} onClose={() => setSidebarOpen(false)} />
                     </div>
                     
                     <main className="flex-1 flex flex-col overflow-hidden">
@@ -246,11 +246,11 @@ const AppContent: React.FC = () => {
                                     <Button 
                                         variant="secondary" 
                                         onClick={() => setSidebarOpen(!isSidebarOpen)} 
-                                        className="px-3"
+                                        className="px-3 text-gray-300 hover:text-white"
                                         aria-label="Toggle filters sidebar"
                                         aria-expanded={isSidebarOpen}
                                     >
-                                        <Icon name={isSidebarOpen ? 'PanelLeftClose' : 'PanelLeftOpen'} size={20} className="mr-0 sm:mr-2"/>
+                                        <Icon name="Filter" size={20} className="mr-0 sm:mr-2"/>
                                         <span className="hidden sm:inline">Filters</span>
                                     </Button>
                                 </div>
