@@ -1,18 +1,36 @@
 
 
+
 import React, { useState, useMemo } from 'react';
 import Icon from '../Icon';
 
 interface CollapsibleFilterListProps {
+  /** The title of the filter section (e.g., "Genres"). */
   title: string;
+  /** The full list of available options. */
   options: string[];
+  /** The list of currently included options. */
   includedOptions: string[];
+  /** The list of currently excluded options. */
   excludedOptions: string[];
+  /** Callback to toggle an option's inclusion or exclusion. */
   onToggleOption: (key: 'genres' | 'tags', option: string, type: 'include' | 'exclude') => void;
+  /** The filter key this list is associated with ('genres' or 'tags'). */
   filterKey: 'genres' | 'tags';
+  /** The number of items to show before the "Show More" button appears. Defaults to 7. */
   initialVisibleCount?: number;
 }
 
+/**
+ * A UI component that displays a list of filterable items (e.g., genres, tags).
+ * Features include:
+ * - A search bar to filter the options within the list.
+ * - Checkboxes for including items.
+ * - A button (visible on hover) to exclude items.
+ * - A "Show More" / "Show Less" button to collapse long lists, improving UI cleanliness.
+ * @param {CollapsibleFilterListProps} props The props for the component.
+ * @returns {JSX.Element} A collapsible and searchable filter list.
+ */
 const CollapsibleFilterList: React.FC<CollapsibleFilterListProps> = ({
   title,
   options,
@@ -46,6 +64,7 @@ const CollapsibleFilterList: React.FC<CollapsibleFilterListProps> = ({
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="w-full bg-gray-700/50 border border-gray-600 rounded-md py-1.5 pl-3 pr-8 text-sm text-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+          aria-label={`Search ${title}`}
         />
         <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
           <Icon name="Search" className="text-gray-500" size={16} />
@@ -62,8 +81,9 @@ const CollapsibleFilterList: React.FC<CollapsibleFilterListProps> = ({
                     checked={includedOptions.includes(option)}
                     onChange={() => onToggleOption(filterKey, option, 'include')}
                     className="h-4 w-4 rounded border-gray-500 bg-gray-700 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                    aria-labelledby={`label-${filterKey}-${option.replace(/\s/g, '-')}`}
                 />
-                <span className={`ml-2 transition-colors ${excludedOptions.includes(option) ? 'line-through text-red-400/80' : ''}`}>
+                <span id={`label-${filterKey}-${option.replace(/\s/g, '-')}`} className={`ml-2 transition-colors ${excludedOptions.includes(option) ? 'line-through text-red-400/80' : ''}`}>
                     {option}
                 </span>
                 </label>
@@ -85,6 +105,7 @@ const CollapsibleFilterList: React.FC<CollapsibleFilterListProps> = ({
         <button
           onClick={() => setIsExpanded(!isExpanded)}
           className="text-indigo-400 hover:text-indigo-300 text-sm font-medium mt-2 flex items-center gap-1"
+          aria-expanded={isExpanded}
         >
           {isExpanded ? 'Show Less' : `Show More (${filteredOptions.length - initialVisibleCount})`}
           <Icon name={isExpanded ? 'ChevronUp' : 'ChevronDown'} size={14} />

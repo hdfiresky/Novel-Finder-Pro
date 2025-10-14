@@ -1,15 +1,28 @@
 
+
 import React, { useState } from 'react';
 import Icon from '../Icon';
 
 interface StarRatingInputProps {
+  /** The current selected rating value. */
   rating: number;
+  /** Callback function to update the rating. */
   setRating: (rating: number) => void;
+  /** The maximum rating value (e.g., 5 or 10 stars). Defaults to 10. */
   maxRating?: number;
+  /** The size of the star icons in pixels. Defaults to 20. */
   size?: number;
 }
 
+/**
+ * An interactive star rating input component.
+ * Allows users to select a rating by clicking on stars.
+ * Provides visual feedback on hover.
+ * @param {StarRatingInputProps} props The props for the component.
+ * @returns {JSX.Element} A row of clickable star icons.
+ */
 const StarRatingInput: React.FC<StarRatingInputProps> = ({ rating, setRating, maxRating = 10, size = 20 }) => {
+  // State to track the rating value when the user hovers over the stars.
   const [hoverRating, setHoverRating] = useState(0);
 
   return (
@@ -30,8 +43,8 @@ const StarRatingInput: React.FC<StarRatingInputProps> = ({ rating, setRating, ma
               size={size}
               className={`cursor-pointer transition-colors ${
                 ratingValue <= (hoverRating || rating)
-                  ? 'text-yellow-400 fill-current'
-                  : 'text-gray-600'
+                  ? 'text-yellow-400 fill-current' // Filled star for selected or hovered
+                  : 'text-gray-600' // Empty star otherwise
               }`}
             />
           </button>

@@ -1,14 +1,23 @@
 
 
+
 import React from 'react';
 import { useUserData } from '../contexts/UserDataContext';
 import Icon from './Icon';
 import Switch from './ui/Switch';
 
 interface SettingsModalProps {
+  /** Callback function to close the modal. */
   onClose: () => void;
 }
 
+/**
+ * A modal dialog that allows logged-in users to configure their application settings.
+ * It uses the `useUserData` context to read and update settings, such as
+ * UI preferences and content filtering options.
+ * @param {SettingsModalProps} props The props for the SettingsModal component.
+ * @returns {JSX.Element} The settings modal.
+ */
 const SettingsModal: React.FC<SettingsModalProps> = ({ onClose }) => {
   const { settings, updateSettings } = useUserData();
 
@@ -16,13 +25,16 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ onClose }) => {
     <div 
         className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4 animate-fade-in"
         onClick={onClose}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="settings-modal-title"
     >
       <div 
         className="relative bg-gray-800 rounded-lg shadow-2xl w-full max-w-md"
         onClick={e => e.stopPropagation()}
       >
         <div className="flex items-center justify-between p-4 border-b border-gray-700">
-            <h2 className="text-xl font-bold text-white flex items-center gap-2">
+            <h2 id="settings-modal-title" className="text-xl font-bold text-white flex items-center gap-2">
                 <Icon name="Cog" size={22} />
                 Settings
             </h2>

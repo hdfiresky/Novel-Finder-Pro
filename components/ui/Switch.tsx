@@ -1,13 +1,24 @@
 
+
 import React from 'react';
 
 interface SwitchProps {
+  /** The current state of the switch (true for on, false for off). */
   checked: boolean;
+  /** Callback function invoked when the switch is toggled. */
   onChange: (checked: boolean) => void;
+  /** The primary label for the switch. */
   label: string;
+  /** An optional, more detailed description displayed below the label. */
   description?: string;
 }
 
+/**
+ * A styled, accessible toggle switch component.
+ * It's used for turning boolean settings on or off.
+ * @param {SwitchProps} props The props for the Switch component.
+ * @returns {JSX.Element} A toggle switch with a label and optional description.
+ */
 const Switch: React.FC<SwitchProps> = ({ checked, onChange, label, description }) => {
   const id = React.useId();
   return (
@@ -17,7 +28,7 @@ const Switch: React.FC<SwitchProps> = ({ checked, onChange, label, description }
           {label}
         </label>
         {description && (
-          <p className="text-sm text-gray-400">{description}</p>
+          <p id={`${id}-description`} className="text-sm text-gray-400">{description}</p>
         )}
       </div>
       <button
@@ -25,6 +36,7 @@ const Switch: React.FC<SwitchProps> = ({ checked, onChange, label, description }
         type="button"
         role="switch"
         aria-checked={checked}
+        aria-describedby={description ? `${id}-description` : undefined}
         onClick={() => onChange(!checked)}
         className={`
           relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent 

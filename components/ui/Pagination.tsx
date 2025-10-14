@@ -1,14 +1,27 @@
 
+
 import React, { useState, useEffect } from 'react';
 import Icon from '../Icon';
 
 interface PaginationProps {
+  /** The currently active page number. */
   currentPage: number;
+  /** The total number of pages available. */
   totalPages: number;
+  /** Callback function invoked when a new page is selected. */
   onPageChange: (page: number) => void;
 }
 
+/**
+ * A pagination component that provides controls to navigate through pages.
+ * It is responsive and adjusts the number of displayed page links based on the
+ * screen width to provide an optimal user experience on both desktop and mobile devices.
+ * It does not render if there is only one page.
+ * @param {PaginationProps} props The props for the Pagination component.
+ * @returns {JSX.Element | null} The pagination navigation bar or null.
+ */
 const Pagination: React.FC<PaginationProps> = ({ currentPage, totalPages, onPageChange }) => {
+  // Track window width to implement responsive pagination.
   const [width, setWidth] = useState(window.innerWidth);
 
   useEffect(() => {
@@ -21,14 +34,17 @@ const Pagination: React.FC<PaginationProps> = ({ currentPage, totalPages, onPage
     return null;
   }
 
+  /**
+   * Generates the array of page numbers and ellipses to be displayed.
+   * The logic adapts to different screen widths.
+   * @returns {(number | string)[]} An array of page numbers and '...' strings.
+   */
   const getPageNumbers = () => {
-    const range = (start, end) => Array.from({ length: end - start + 1 }, (_, i) => start + i);
+    const range = (start: number, end: number) => Array.from({ length: end - start + 1 }, (_, i) => start + i);
 
-    // Large screens (md and up)
+    // Large screens (>= 768px): Shows up to 7 page numbers.
     if (width >= 768) {
-      if (totalPages <= 7) {
-        return range(1, totalPages);
-      }
+      if (totalPages <= 7) return range(1, totalPages);
       const showLeftDots = currentPage > 4;
       const showRightDots = currentPage < totalPages - 3;
       if (!showLeftDots && showRightDots) return [1, 2, 3, 4, 5, '...', totalPages];
@@ -36,11 +52,9 @@ const Pagination: React.FC<PaginationProps> = ({ currentPage, totalPages, onPage
       if (showLeftDots && showRightDots) return [1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages];
     }
     
-    // Medium screens (sm)
+    // Medium screens (>= 640px): Shows up to 5 page numbers.
     if (width >= 640) {
-      if (totalPages <= 5) {
-        return range(1, totalPages);
-      }
+      if (totalPages <= 5) return range(1, totalPages);
       const showLeftDots = currentPage > 3;
       const showRightDots = currentPage < totalPages - 2;
       if (!showLeftDots && showRightDots) return [1, 2, 3, '...', totalPages];
@@ -48,10 +62,8 @@ const Pagination: React.FC<PaginationProps> = ({ currentPage, totalPages, onPage
       if (showLeftDots && showRightDots) return [1, '...', currentPage, '...', totalPages];
     }
 
-    // Small screens (xs)
-    if (totalPages <= 4) {
-      return range(1, totalPages);
-    }
+    // Small screens (< 640px): Shows up to 4 page numbers.
+    if (totalPages <= 4) return range(1, totalPages);
     if (currentPage <= 2) return [1, 2, '...', totalPages];
     if (currentPage >= totalPages - 1) return [1, '...', totalPages - 1, totalPages];
     return [1, '...', currentPage, '...', totalPages];
@@ -59,7 +71,7 @@ const Pagination: React.FC<PaginationProps> = ({ currentPage, totalPages, onPage
 
   const pages = getPageNumbers();
   
-  if (!pages) return null; // Should not happen if totalPages > 1
+  if (!pages) return null;
 
   return (
     <nav className="flex items-center justify-center gap-1 sm:gap-2 mt-8" aria-label="Pagination">
@@ -75,7 +87,7 @@ const Pagination: React.FC<PaginationProps> = ({ currentPage, totalPages, onPage
       <div className="flex items-center gap-1">
         {pages.map((page, index) => {
           if (typeof page === 'string') {
-            return <span key={`ellipsis-${index}`} className="px-1 sm:px-2 py-2 text-gray-500 text-xs sm:text-base">...</span>;
+            return <span key={`ellipsis-${index}`} className="px-1 sm:px-2 py-2 text-gray-500 text-xs sm:text-base" aria-hidden="true">...</span>;
           }
           return (
             <button

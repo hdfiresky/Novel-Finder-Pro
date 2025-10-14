@@ -1,5 +1,6 @@
 
 
+
 import React from 'react';
 import { Novel } from '../types';
 import Badge from './ui/Badge';
@@ -9,31 +10,57 @@ import { useAuth } from '../contexts/AuthContext';
 import { useUserData } from '../contexts/UserDataContext';
 
 interface NovelCardProps {
+  /** The novel object containing the data to display. */
   novel: Novel;
+  /** Callback function when the card is clicked. */
   onSelect: (novel: Novel) => void;
+  /** Callback function to add a genre or tag to the main filters. */
   onAddFilter: (key: 'genres' | 'tags', value: string) => void;
 }
 
+/**
+ * A card component that displays a summary of a novel.
+ * It includes the cover image, title, author, rating, and genres.
+ * Provides actions for selecting the novel, filtering by genre, and
+ * (if logged in) adding to favorites or wishlist.
+ * @param {NovelCardProps} props The props for the NovelCard component.
+ * @returns {JSX.Element} A styled card for a single novel.
+ */
 const NovelCard: React.FC<NovelCardProps> = ({ novel, onSelect, onAddFilter }) => {
   const { user } = useAuth();
   const { isFavorite, toggleFavorite, isWished, toggleWishlist, settings } = useUserData();
   const favorited = isFavorite(novel.id);
   const wished = isWished(novel.id);
 
+  /**
+   * Handles clicks on genre badges.
+   * Prevents the click from propagating to the parent card element,
+   * which would trigger the `onSelect` handler.
+   * @param e The mouse event.
+   * @param genre The genre string to add as a filter.
+   */
   const handleGenreClick = (e: React.MouseEvent, genre: string) => {
-    e.stopPropagation();
+    e.stopPropagation(); // Prevent opening the modal when a genre is clicked
     onAddFilter('genres', genre);
   };
 
+  /**
+   * Handles clicks on the favorite button.
+   * @param e The mouse event.
+   */
   const handleFavoriteClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
+    e.stopPropagation(); // Prevent modal opening
     if (user) {
       toggleFavorite(novel);
     }
   };
 
+  /**
+   * Handles clicks on the wishlist button.
+   * @param e The mouse event.
+   */
   const handleWishlistClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
+    e.stopPropagation(); // Prevent modal opening
     if (user) {
       toggleWishlist(novel);
     }
@@ -43,6 +70,9 @@ const NovelCard: React.FC<NovelCardProps> = ({ novel, onSelect, onAddFilter }) =
     <div 
       className="bg-gray-800 rounded-lg overflow-hidden shadow-lg hover:shadow-indigo-500/30 transition-all duration-300 ease-in-out transform hover:-translate-y-1 cursor-pointer group flex flex-col"
       onClick={() => onSelect(novel)}
+      role="button"
+      tabIndex={0}
+      aria-label={`View details for ${novel.title}`}
     >
       <div className="relative">
         <ImageWithLoader
@@ -55,6 +85,7 @@ const NovelCard: React.FC<NovelCardProps> = ({ novel, onSelect, onAddFilter }) =
           {novel.rating.toFixed(1)}
         </div>
         
+        {/* User-specific actions are only shown if a user is logged in and settings allow */}
         {user && (settings.showFavoriteButton || settings.showWishlistButton) && (
           <div className="absolute top-2 left-2 flex gap-1.5">
             {settings.showFavoriteButton && (

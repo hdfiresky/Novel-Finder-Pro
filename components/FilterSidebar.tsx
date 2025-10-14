@@ -1,5 +1,3 @@
-
-
 import React from 'react';
 import { FilterState, SortOption, RecommendationCriteria } from '../types';
 import RangeSlider from './ui/RangeSlider';
@@ -23,6 +21,12 @@ interface FilterSidebarProps {
   onRecommendationCriteriaChange: (key: keyof RecommendationCriteria) => void;
 }
 
+/**
+ * The main sidebar component that houses all filtering and sorting controls.
+ * It is a fully controlled component, receiving its state and update handlers from its parent.
+ * @param {FilterSidebarProps} props The props for the FilterSidebar component.
+ * @returns {JSX.Element} The sidebar UI element.
+ */
 const FilterSidebar: React.FC<FilterSidebarProps> = ({
   filterState,
   onFilterChange,
@@ -70,6 +74,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
             value={filterState.status || ''} 
             onChange={e => onFilterChange('status', e.target.value || null)}
             className="w-full bg-gray-700 border-gray-600 rounded-md py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            aria-label="Filter by status"
           >
             <option value="">All</option>
             {availableStatuses.map(status => (

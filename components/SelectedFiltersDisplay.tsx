@@ -1,14 +1,25 @@
 
+
 import React from 'react';
 import { FilterState } from '../types';
 import Icon from './Icon';
 
 interface SelectedFiltersDisplayProps {
+  /** The current state of all filters. */
   filters: FilterState;
+  /** Callback to remove a specific filter. */
   onRemoveFilter: (key: 'genres' | 'tags', value: string, type: 'include' | 'exclude') => void;
+  /** Callback to clear all active filters. */
   onClearAll: () => void;
 }
 
+/**
+ * A component that displays the currently active genre and tag filters as a collection of badges.
+ * It provides buttons to remove individual filters or to clear all filters at once.
+ * The component is only visible when at least one filter is active.
+ * @param {SelectedFiltersDisplayProps} props The props for the component.
+ * @returns {JSX.Element} A container with active filter badges.
+ */
 const SelectedFiltersDisplay: React.FC<SelectedFiltersDisplayProps> = ({ filters, onRemoveFilter, onClearAll }) => {
   const { genres, tags } = filters;
   const hasFilters = genres.include.length > 0 || genres.exclude.length > 0 || tags.include.length > 0 || tags.exclude.length > 0;
@@ -20,6 +31,8 @@ const SelectedFiltersDisplay: React.FC<SelectedFiltersDisplayProps> = ({ filters
         transition-[max-height,padding,opacity] duration-300 ease-in-out overflow-y-auto
         ${hasFilters ? 'max-h-40 px-6 pt-4 pb-2 opacity-100 border-gray-700' : 'max-h-0 p-0 opacity-0 border-transparent'}
       `}
+      aria-live="polite"
+      aria-hidden={!hasFilters}
     >
       <div className="flex items-center flex-wrap gap-2">
         <h4 className="text-sm font-semibold text-gray-400 mr-2 shrink-0">Active Filters:</h4>

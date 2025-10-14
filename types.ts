@@ -27,6 +27,7 @@ export type ScoredNovel = Novel & { score: number };
 
 export interface FilterState {
   searchTerm: string;
+  searchFields: ('title' | 'author' | 'description')[];
   genres: {
     include: string[];
     exclude: string[];
