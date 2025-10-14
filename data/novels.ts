@@ -25,6 +25,8 @@ export const loadNovels = async (): Promise<Novel[]> => {
     }
     const rawData = await response.json();
 
+    const GENRE_THRESHOLD = 10; // A reasonable threshold to detect bad genre data from the source
+
     const processedNovels: Novel[] = (rawData as any[]).map((novel, index) => {
       let finalChapterCount: number;
       const title = novel.latest_chapter?.title;
@@ -37,10 +39,16 @@ export const loadNovels = async (): Promise<Novel[]> => {
         finalChapterCount = novel.chapter_count ?? 0;
       }
 
+      // Data cleaning: some novels have a huge list of genres when none are specified.
+      // We'll treat this as having no genres by clearing the array if it's too long.
+      const genres = novel.genres || [];
+      const cleanedGenres = genres.length > GENRE_THRESHOLD ? [] : genres;
+
       return {
         ...novel,
         id: `${novel.title.replace(/\s/g, '-')}-${index}`,
         status: novel.status as Novel['status'],
+        genres: cleanedGenres,
         cover_image: novel.cover_image || `https://picsum.photos/seed/${stringToHash(novel.title)}/400/600`,
         chapter_count: finalChapterCount,
       };
