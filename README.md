@@ -1,3 +1,4 @@
+
 # Novel Finder Pro 📖✨
 
 An advanced web application for discovering, filtering, and managing your favorite web novels, powered by React and a sophisticated recommendation engine.
@@ -29,7 +30,7 @@ Novel Finder Pro is packed with features designed for avid readers:
     *   **Customizable UI:** Toggle the visibility of 'Favorite' and 'Wishlist' buttons to tailor the interface to your preference.
 *   **💾 Session Persistence:** All your filters, sorting preferences, and current page are saved to your session, so you can pick up right where you left off.
 *   **📱 Fully Responsive:** Enjoy a seamless experience on any device, from desktop to mobile.
-*   **☁️ Optional Supabase Backend:** Easily migrate from local storage to a persistent Supabase backend for a full-stack experience. See `MIGRATE_TO_SUPABASE.md` for details.
+*   **🔌 Optional Backend Mode:** Can run entirely frontend-only or connect to a MySQL backend for persistent storage.
 
 ---
 
@@ -38,8 +39,8 @@ Novel Finder Pro is packed with features designed for avid readers:
 *   **Frontend:** [React 19](https://react.dev/) & [TypeScript](https://www.typescriptlang.org/)
 *   **Styling:** [Tailwind CSS](https://tailwindcss.com/)
 *   **Icons:** [Lucide React](https://lucide.dev/)
-*   **Database (Optional):** [Supabase](https://supabase.io/)
 *   **Module Loading:** [ESM.sh](https://esm.sh/) (No build step needed!)
+*   **Backend (Optional):** Express.js & MySQL
 
 ---
 
@@ -90,25 +91,29 @@ The codebase is organized into a clean and maintainable structure:
 │   ├── ui/             # Generic UI elements (Button, Badge, etc.)
 │   └── ...             # Feature-specific components
 ├── contexts/           # React Context for global state (Auth, UserData)
+├── services/           # API Abstraction layer
 ├── data/               # Static data and data loading logic
 ├── hooks/              # Custom React hooks
 ├── public/             # Static assets
-├── supabase/           # Supabase client configuration
+├── backend/            # Express.js Server
 ├── App.tsx             # Main application component
 ├── index.html          # Entry point with import maps
 ├── index.tsx           # React root renderer
 ├── types.ts            # TypeScript type definitions
+├── config.ts           # Global configuration (Backend mode toggle)
 ├── README.md           # You are here!
-└── MIGRATE_TO_SUPABASE.md # Guide for backend migration
+└── BACKEND_GUIDE.md    # Guide for setting up MySQL backend
 ```
 
 ---
 
-## ☁️ Migrating to Supabase
+## ☁️ Backend Mode (MySQL)
 
-The application is initially configured to use the browser's `localStorage` for all user data, allowing it to run entirely on the client-side. For a persistent, multi-device experience, you can easily migrate to a Supabase backend.
+By default, the application runs in **Frontend Only** mode using `localStorage` to simulate a database.
 
-Full instructions are provided in the [**`MIGRATE_TO_SUPABASE.md`**](./MIGRATE_TO_SUPABASE.md) file.
+To enable the real backend:
+1.  Set up the MySQL database and Express server by following [**`BACKEND_GUIDE.md`**](./BACKEND_GUIDE.md).
+2.  Open `config.ts` and set `USE_BACKEND: true`.
 
 ---
 

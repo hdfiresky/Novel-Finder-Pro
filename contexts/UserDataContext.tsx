@@ -1,12 +1,8 @@
 
-
-
 import React, { createContext, useState, useEffect, useContext, ReactNode, useCallback } from 'react';
 import { Novel, Review, UserSettings } from '../types';
 import { useAuth } from './AuthContext';
-// STEP 1: Uncomment this line to use Supabase
-// import { supabase } from '../supabase/client';
-
+import { userApi } from '../services/api';
 
 interface UserDataContextType {
   favorites: Set<string>;
@@ -31,18 +27,6 @@ const defaultSettings: UserSettings = {
     showNsfw: false,
 };
 
-/**
- * The provider component for managing personalized user data.
- * It handles state for favorites, reviews, wishlist, and UI settings.
- * It depends on the `AuthContext` to associate data with the logged-in user.
- *
- * NOTE: This file contains two implementations:
- * 1. A mock implementation using `localStorage` (currently active).
- * 2. A real implementation using Supabase (currently commented out).
- * To switch, follow the steps outlined in `MIGRATE_TO_SUPABASE.md`.
- * @param {object} props The component props.
- * @param {ReactNode} props.children The child components to be rendered within the provider.
- */
 export const UserDataProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { user } = useAuth();
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
@@ -51,47 +35,29 @@ export const UserDataProvider: React.FC<{ children: ReactNode }> = ({ children }
   const [settings, setSettings] = useState<UserSettings>(defaultSettings);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  // --- LOCAL STORAGE IMPLEMENTATION (Current) ---
-  /**
-   * Effect to load user data from localStorage when a user logs in,
-   * and clear it when they log out.
-   */
   useEffect(() => {
     if (user) {
-      try {
-        const favsKey = `novel_finder_favorites_${user.id}`;
-        setFavorites(new Set(JSON.parse(localStorage.getItem(favsKey) || '[]')));
-        
-        const reviewsKey = `novel_finder_reviews_${user.id}`;
-        setReviews(new Map(Object.entries(JSON.parse(localStorage.getItem(reviewsKey) || '{}'))));
-
-        const wishlistKey = `novel_finder_wishlist_${user.id}`;
-        setWishlist(new Set(JSON.parse(localStorage.getItem(wishlistKey) || '[]')));
-
-        const settingsKey = `novel_finder_settings_${user.id}`;
-        setSettings({ ...defaultSettings, ...JSON.parse(localStorage.getItem(settingsKey) || '{}') });
-
-      } catch (error) {
-        console.error("Failed to load user data from localStorage", error);
-        // Reset to defaults on error
-        setFavorites(new Set()); setReviews(new Map()); setWishlist(new Set()); setSettings(defaultSettings);
-      } finally {
-        setIsLoaded(true);
-      }
+      const loadData = async () => {
+        try {
+            const data = await userApi.getData(user.id);
+            setFavorites(data.favorites);
+            setWishlist(data.wishlist);
+            setReviews(data.reviews);
+            setSettings({ ...defaultSettings, ...data.settings });
+        } catch (error) {
+            console.error("Failed to load user data", error);
+            setFavorites(new Set()); setReviews(new Map()); setWishlist(new Set()); setSettings(defaultSettings);
+        } finally {
+            setIsLoaded(true);
+        }
+      };
+      loadData();
     } else {
-      // Clear data when user logs out
       setFavorites(new Set()); setReviews(new Map()); setWishlist(new Set()); setSettings(defaultSettings);
       setIsLoaded(false);
     }
   }, [user]);
-  
-  /** Helper function to persist a piece of user data to localStorage. */
-  const persistData = (key: string, data: any) => {
-    if (user) {
-      localStorage.setItem(`novel_finder_${key}_${user.id}`, JSON.stringify(data));
-    }
-  };
-  
+
   const isFavorite = useCallback((novelId: string) => favorites.has(novelId), [favorites]);
   const toggleFavorite = (novel: Novel) => {
     if (!user) return;
@@ -99,7 +65,7 @@ export const UserDataProvider: React.FC<{ children: ReactNode }> = ({ children }
     if (newFavorites.has(novel.id)) newFavorites.delete(novel.id);
     else newFavorites.add(novel.id);
     setFavorites(newFavorites);
-    persistData('favorites', Array.from(newFavorites));
+    userApi.syncFavorites(user.id, Array.from(newFavorites)).catch(console.error);
   };
 
   const isWished = useCallback((novelId: string) => wishlist.has(novelId), [wishlist]);
@@ -109,7 +75,7 @@ export const UserDataProvider: React.FC<{ children: ReactNode }> = ({ children }
     if (newWishlist.has(novel.id)) newWishlist.delete(novel.id);
     else newWishlist.add(novel.id);
     setWishlist(newWishlist);
-    persistData('wishlist', Array.from(newWishlist));
+    userApi.syncWishlist(user.id, Array.from(newWishlist)).catch(console.error);
   };
   
   const getReview = useCallback((novelId: string) => reviews.get(novelId), [reviews]);
@@ -118,7 +84,7 @@ export const UserDataProvider: React.FC<{ children: ReactNode }> = ({ children }
     const newReviews = new Map(reviews);
     newReviews.set(novelId, review);
     setReviews(newReviews);
-    persistData('reviews', Object.fromEntries(newReviews));
+    userApi.updateReview(user.id, novelId, review).catch(console.error);
   };
 
   const deleteReview = (novelId: string) => {
@@ -126,126 +92,17 @@ export const UserDataProvider: React.FC<{ children: ReactNode }> = ({ children }
     const newReviews = new Map(reviews);
     newReviews.delete(novelId);
     setReviews(newReviews);
-    persistData('reviews', Object.fromEntries(newReviews));
+    userApi.deleteReview(user.id, novelId).catch(console.error);
   };
 
   const updateSettings = (newSettings: Partial<UserSettings>) => {
     if (!user) return;
     setSettings(prev => {
         const updated = { ...prev, ...newSettings };
-        persistData('settings', updated);
+        userApi.updateSettings(user.id, newSettings).catch(console.error);
         return updated;
     });
   };
-  // --- END OF LOCAL STORAGE IMPLEMENTATION ---
-
-
-  // --- SUPABASE IMPLEMENTATION (Commented Out) ---
-  /*
-  // STEP 2: Comment out the entire "LOCAL STORAGE IMPLEMENTATION" block above.
-  // STEP 3: Uncomment this "SUPABASE IMPLEMENTATION" block below.
-
-  useEffect(() => {
-    if (user && !isLoaded) {
-        const loadUserData = async () => {
-            try {
-                const [favRes, wishRes, revRes, settingsRes] = await Promise.all([
-                    supabase.from('favorites').select('novel_id').eq('user_id', user.id),
-                    supabase.from('wishlist').select('novel_id').eq('user_id', user.id),
-                    supabase.from('reviews').select('*').eq('user_id', user.id),
-                    supabase.from('profiles').select('show_favorite_button, show_wishlist_button, show_nsfw_content').eq('id', user.id).single()
-                ]);
-
-                if (favRes.error) throw favRes.error; setFavorites(new Set(favRes.data.map(f => f.novel_id)));
-                if (wishRes.error) throw wishRes.error; setWishlist(new Set(wishRes.data.map(w => w.novel_id)));
-                if (revRes.error) throw revRes.error;
-                const reviewsMap = new Map<string, Review>();
-                revRes.data.forEach(r => reviewsMap.set(r.novel_id, { rating: r.rating, text: r.text }));
-                setReviews(reviewsMap);
-                if (settingsRes.error) throw settingsRes.error;
-                if (settingsRes.data) setSettings({ showFavoriteButton: settingsRes.data.show_favorite_button, showWishlistButton: settingsRes.data.show_wishlist_button, showNsfw: settingsRes.data.show_nsfw_content });
-            } catch (error) { console.error("Error loading user data from Supabase:", error); } 
-            finally { setIsLoaded(true); }
-        };
-        loadUserData();
-    } else if (!user) {
-        setFavorites(new Set()); setWishlist(new Set()); setReviews(new Map()); setSettings(defaultSettings);
-        setIsLoaded(false);
-    }
-  }, [user, isLoaded]);
-
-  const isFavorite = useCallback((novelId: string) => favorites.has(novelId), [favorites]);
-  const toggleFavorite = async (novel: Novel) => {
-    if (!user) return;
-    const newFavorites = new Set(favorites);
-    if (favorites.has(novel.id)) newFavorites.delete(novel.id); else newFavorites.add(novel.id);
-    setFavorites(newFavorites);
-    try {
-        if (favorites.has(novel.id)) {
-            const { error } = await supabase.from('favorites').delete().match({ user_id: user.id, novel_id: novel.id });
-            if (error) throw error;
-        } else {
-            const { error } = await supabase.from('favorites').insert({ user_id: user.id, novel_id: novel.id });
-            if (error) throw error;
-        }
-    } catch (error) { console.error("Error toggling favorite:", error); setFavorites(favorites); }
-  };
-
-  const isWished = useCallback((novelId: string) => wishlist.has(novelId), [wishlist]);
-  const toggleWishlist = async (novel: Novel) => {
-    if (!user) return;
-    const newWishlist = new Set(wishlist);
-    if (wishlist.has(novel.id)) newWishlist.delete(novel.id); else newWishlist.add(novel.id);
-    setWishlist(newWishlist);
-    try {
-        if (wishlist.has(novel.id)) {
-            const { error } = await supabase.from('wishlist').delete().match({ user_id: user.id, novel_id: novel.id });
-            if (error) throw error;
-        } else {
-            const { error } = await supabase.from('wishlist').insert({ user_id: user.id, novel_id: novel.id });
-            if (error) throw error;
-        }
-    } catch (error) { console.error("Error toggling wishlist:", error); setWishlist(wishlist); }
-  };
-
-  const getReview = useCallback((novelId: string) => reviews.get(novelId), [reviews]);
-  const updateReview = async (novelId: string, review: Review) => {
-    if (!user) return;
-    const oldReviews = new Map(reviews);
-    const newReviews = new Map(reviews);
-    newReviews.set(novelId, review);
-    setReviews(newReviews);
-    try {
-        const { error } = await supabase.from('reviews').upsert({ user_id: user.id, novel_id: novelId, rating: review.rating, text: review.text }, { onConflict: 'user_id,novel_id' });
-        if (error) throw error;
-    } catch (error) { console.error("Error updating review:", error); setReviews(oldReviews); }
-  };
-
-  const deleteReview = async (novelId: string) => {
-    if (!user) return;
-    const oldReviews = new Map(reviews);
-    const newReviews = new Map(reviews);
-    newReviews.delete(novelId);
-    setReviews(newReviews);
-    try {
-        const { error } = await supabase.from('reviews').delete().match({ user_id: user.id, novel_id: novelId });
-        if (error) throw error;
-    } catch (error) { console.error("Error deleting review:", error); setReviews(oldReviews); }
-  };
-
-  const updateSettings = async (newSettings: Partial<UserSettings>) => {
-    if (!user) return;
-    const oldSettings = { ...settings };
-    const updated = { ...settings, ...newSettings };
-    setSettings(updated);
-    try {
-        const { error } = await supabase.from('profiles').update({ show_favorite_button: updated.showFavoriteButton, show_wishlist_button: updated.showWishlistButton, show_nsfw_content: updated.showNsfw }).eq('id', user.id);
-        if (error) throw error;
-    } catch (error) { console.error("Error updating settings:", error); setSettings(oldSettings); }
-  };
-  */
-  // --- END OF SUPABASE IMPLEMENTATION ---
-
 
   const value = {
       favorites, reviews, wishlist, settings,
@@ -260,13 +117,6 @@ export const UserDataProvider: React.FC<{ children: ReactNode }> = ({ children }
   );
 };
 
-/**
- * A custom hook to easily access the user data context.
- * Provides access to user's favorites, reviews, wishlist, settings, and functions to modify them.
- * This hook must be used within a component wrapped by `UserDataProvider`.
- * @returns {UserDataContextType} The user data context value.
- * @throws {Error} If used outside of a `UserDataProvider`.
- */
 export const useUserData = () => {
   const context = useContext(UserDataContext);
   if (context === undefined) {
